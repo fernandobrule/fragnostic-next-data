@@ -78,7 +78,7 @@ lazy val fragnosticExportExcel = Project(
       fragnosticSupport,
       logbackClassic,
       slf4jApi,
-      scalatest % "test",
+      scalatest,
     ),
     description := "fragnostic-next-data"
   )
