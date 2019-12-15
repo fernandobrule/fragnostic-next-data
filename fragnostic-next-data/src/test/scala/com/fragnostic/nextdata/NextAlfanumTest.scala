@@ -9,6 +9,7 @@ class NextAlfanumTest extends FunSpec with Matchers with NextAlfanum {
     it("Can get nextRandomSparePart") {
       val next = nextRandomSparePart
       next should not be "ooops"
+      println(s"next:$next")
     }
 
   }
