@@ -1,76 +1,112 @@
 package com.fragnostic.nextdata
 
 import java.io.{ BufferedReader, InputStreamReader }
+import java.util.Locale
 
 import com.fragnostic.support.FilesSupport
+import com.fragnostic.validator.RutValidator
 import org.slf4j.{ Logger, LoggerFactory }
 
+import scala.annotation.tailrec
 import scala.util.Random
 
-trait NextAlfanum extends FilesSupport {
+trait NextAlfanum extends FilesSupport with RutValidator {
 
   private[this] val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  private val path2names = "/nombres.dat"
-  private val path2adjetivos = "/adjetivos.dat"
-  private val path2spareparts = "/sparepart.dat"
-  private val path2colors = "/colors.dat"
+  private lazy val chars: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  private lazy val path2adjetivos = "/adjetivos.dat"
+  private lazy val path2colors = "/colors.dat"
+  private lazy val path2names = "/nombres.dat"
+  private lazy val path2spareparts = "/sparepart.dat"
+  private lazy val razonPosfix: List[String] = List("S.A.", "Ltda.", "EIRL", "Cia.")
+  private lazy val tlds: List[String] = List("com", "cl", "pt", "br")
 
-  private val random = Random
+  final def nextAlphaNum: Char =
+    chars charAt (Random nextInt chars.length)
 
-  private val rutNums = List(2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7)
-
-  private def nextRandomString(path: String): String =
-    Option(getClass getResourceAsStream (path)) map (
-      is => Option(new InputStreamReader(is)) map (
-        isr => Option(new BufferedReader(isr)) map (
-          br => {
-            val list: List[String] = bufferedReaderToList(br, List[String]())
-            list(random.nextInt(list.size))
-          }) getOrElse {
-            logger.error("nextRandomString() - try to get BufferedReader error")
-            "ooops"
-          }) getOrElse {
-          logger.error("nextRandomString() - try to get InputStreamReader error")
+  private final def nextRandomWord(path: String): String =
+    Option(getClass getResourceAsStream (path)) map (is =>
+      Option(new InputStreamReader(is)) map (isr =>
+        Option(new BufferedReader(isr)) map (br => {
+          val list: List[String] = bufferedReaderToList(br, List[String]())
+          list(Random.nextInt(list.size))
+        }) getOrElse {
+          logger.error("nextRandomWord() - try to get BufferedReader error")
           "ooops"
         }) getOrElse {
-        logger.error(s"nextRandomString() - try to get InputStream error, path:$path")
+        logger.error("nextRandomWord() - try to get InputStreamReader error")
         "ooops"
-      }
-
-  def nextRandomNom: String =
-    nextRandomString(path2names)
-
-  def nextRandomColor: String =
-    nextRandomString(path2colors)
-
-  def nextRandomAdj: String =
-    nextRandomString(path2adjetivos)
-
-  def nextRandomSparePart: String =
-    nextRandomString(path2spareparts)
-
-  def nextRandomEmail(nom: String): String =
-    s"$nom@$nextRandomAdj.com"
-
-  private def calculaDigitoVerificador(rutBase: String): String = {
-    val mult =
-      (rutBase.reverseMap(_.asDigit).toList, rutNums).zipped.map(_ * _)
-    val suma = (0 /: mult)(_ + _)
-    val resto = suma % 11
-    val diff = 11 - resto
-    if (diff == 10) "k"
-    else diff.toString
-  }
-
-  def nextRandomRut: String = {
-    var rut: Long = random.nextLong()
-    while (rut < 0) {
-      rut = random.nextLong()
+      }) getOrElse {
+      logger.error(s"nextRandomWord() - try to get InputStream error, path:$path")
+      "ooops"
     }
-    // 10308143
-    val base = rut.toString.substring(0, 8)
-    s"$base-${calculaDigitoVerificador(base)}"
+
+  @tailrec
+  private def nextRutRaw: String = {
+    val rutRaw: Long = Random.nextLong()
+    if (rutRaw < 0) {
+      nextRutRaw
+    } else {
+      val base = rutRaw.toString.substring(0, 8)
+      s"$base-${calculaDigitoVerificador(base)}"
+    }
   }
+
+  lazy val localeEsCl: Locale = new Locale.Builder()
+    .setLanguage("es")
+    .setRegion("CL")
+    .build()
+
+  lazy val localeEnUs: Locale = new Locale.Builder()
+    .setLanguage("en")
+    .setRegion("US")
+    .build()
+
+  lazy val localePtBr: Locale = new Locale.Builder()
+    .setLanguage("pt")
+    .setRegion("BR")
+    .build()
+
+  final def nextRandomAdj: String =
+    nextRandomWord(path2adjetivos)
+
+  final def nextRandomColor: String =
+    nextRandomWord(path2colors)
+
+  final def nextRandomDominio(nomFant: String): String =
+    s"${nomFant.toLowerCase.replaceAll("\\s", "-")}.${tlds(Random.nextInt(4))}"
+
+  final def nextRandomEmail(nom: String, nomFant: String): String =
+    s"${nom.toLowerCase}@${nextRandomDominio(nomFant)}"
+
+  final def nextRandomEmail: String =
+    s"${nextRandomNom.toLowerCase}.${nextRandomNom.toLowerCase}@${nextRandomDominio(nextRandomNomFant)}"
+
+  final def nextRandomNom: String =
+    nextRandomWord(path2names)
+
+  final def nextRandomNomFant: String =
+    s"${nextRandomNom.capitalize} ${nextRandomAdj.capitalize}"
+
+  final def nextRandomPsw(maxLength: Int): String =
+    if (maxLength > 0) {
+      s"$nextAlphaNum${nextRandomPsw(maxLength - 1)}"
+    } else {
+      ""
+    }
+
+  final def nextRandomRazon: String =
+    s"${nextRandomAdj.capitalize} ${nextRandomAdj.capitalize} ${razonPosfix(Random.nextInt(4))}"
+
+  final def nextRandomRut: String =
+    validate(nextRutRaw) fold (error => nextRandomRut,
+      rut => rut)
+
+  final def nextRandomSparePart: String =
+    nextRandomWord(path2spareparts)
+
+  final def nextRandomWebSite(nomFant: String): String =
+    s"https://www.${nomFant.toLowerCase.replaceAll("\\s+", "-")}.com"
 
 }
