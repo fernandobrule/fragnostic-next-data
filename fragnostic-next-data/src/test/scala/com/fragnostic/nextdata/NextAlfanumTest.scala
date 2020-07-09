@@ -34,7 +34,8 @@ class NextAlfanumTest extends FunSpec with Matchers with NextAlfanum with RutVal
     }
 
     it("Can Get Next Random Web Site") {
-      val next = nextRandomWebSite(nextRandomNomFant)
+      val countryCode: String = nextRandomCountryCode
+      val next = nextRandomWebSite(nextRandomNomFant, countryCode)
       println(s"next random web site:\u0027$next\u0027")
     }
 
