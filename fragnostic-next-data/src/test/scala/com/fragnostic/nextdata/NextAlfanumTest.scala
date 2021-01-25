@@ -1,9 +1,6 @@
 package com.fragnostic.nextdata
 
-import com.fragnostic.validator.RutValidator
-import org.scalatest.{ FunSpec, Matchers }
-
-class NextAlfanumTest extends FunSpec with Matchers with NextAlfanum with RutValidator {
+class NextAlfanumTest extends AbstractTest {
 
   describe("Next Alfanum Test") {
 
@@ -31,12 +28,6 @@ class NextAlfanumTest extends FunSpec with Matchers with NextAlfanum with RutVal
       val next = nextRandomSparePart
       next should not be "ooops"
       println(s"next random spare part:\u0027$next\u0027")
-    }
-
-    it("Can Get Next Random Web Site") {
-      val countryCode: String = nextRandomCountryCode
-      val next = nextRandomWebSite(nextRandomNomFant, countryCode)
-      println(s"next random web site:\u0027$next\u0027")
     }
 
   }

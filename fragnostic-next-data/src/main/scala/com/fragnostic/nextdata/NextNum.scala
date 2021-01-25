@@ -33,9 +33,6 @@ trait NextNum {
     }
   }
 
-  final def nextTelefono: String =
-    s"9${nextLongPositivo.toString.substring(0, 4)}${nextLongPositivo.toString.substring(0, 4)}"
-
   final def nextRandomBigDecimal: BigDecimal = BigDecimal(Random.nextDouble() * Random.nextInt(100000))
 
   final def nextRandomPrice(decimals: Int): BigDecimal =
