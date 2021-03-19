@@ -6,9 +6,9 @@ class NextAlfanumTest extends AbstractTest {
 
     it("Can Get Next Random Password") {
       val maxLength: Int = 36
-      val next = nextRandomPsw(maxLength)
-      next.length should be(maxLength)
-      println(s"next random password:\u0027$next\u0027")
+      val password = nextRandomPsw(maxLength)
+      password.length should be(maxLength)
+      println(s"next random password:\u0027$password\u0027")
     }
 
     it("Can Get Next Random Rut") {

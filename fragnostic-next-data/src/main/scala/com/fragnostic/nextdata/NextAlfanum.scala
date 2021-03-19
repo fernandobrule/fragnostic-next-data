@@ -12,15 +12,13 @@ trait NextAlfanum extends FilesSupport with RutValidator {
 
   private[this] val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
-  private lazy val chars: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+  // https://owasp.org/www-community/password-special-characters
+  private lazy val passwordSpecialCharacters: String = """ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789\u0020\u0021\u0022\u0023\u0024\u0025\u0026\u0027\u0028\u0029\u002A\u002B\u002C\u002D\u002E\u002F\u003A\u003B\u003C\u003D\u003E\u003F\u0040\u005B\u005C\u005D\u005E\u005F\u0060\u007B\u007C\u007D\u007E"""
   private lazy val path2adjetivos = "/adjetivos.dat"
   private lazy val path2colors = "/colors.dat"
   private lazy val path2names = "/nombres.dat"
   private lazy val path2spareparts = "/sparepart.dat"
   private lazy val razonPosfix: List[String] = List("S.A.", "Ltda.", "EIRL", "Cia.")
-
-  final def nextAlphaNum: Char =
-    chars charAt (Random nextInt chars.length)
 
   private final def nextRandomWord(path: String): String =
     Option(getClass getResourceAsStream (path)) map (is =>
@@ -68,9 +66,15 @@ trait NextAlfanum extends FilesSupport with RutValidator {
   final def nextRandomNomFant: String =
     s"${nextRandomNom.capitalize} ${nextRandomAdj.capitalize}"
 
+  final def nextRandomUsername: String =
+    s"${nextRandomNom.capitalize}${nextRandomAdj.capitalize}"
+
+  final def nextCharInPsw: Char =
+    passwordSpecialCharacters charAt (Random nextInt passwordSpecialCharacters.length)
+
   final def nextRandomPsw(maxLength: Int): String =
     if (maxLength > 0) {
-      s"$nextAlphaNum${nextRandomPsw(maxLength - 1)}"
+      s"$nextCharInPsw${nextRandomPsw(maxLength - 1)}"
     } else {
       ""
     }
