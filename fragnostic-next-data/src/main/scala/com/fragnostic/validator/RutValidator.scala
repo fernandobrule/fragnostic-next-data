@@ -1,10 +1,6 @@
 package com.fragnostic.validator
 
-import org.slf4j.{ Logger, LoggerFactory }
-
 trait RutValidator {
-
-  private[this] val logger: Logger = LoggerFactory.getLogger(getClass.getName)
 
   private lazy val k = "k"
   private lazy val rutNums = List(2, 3, 4, 5, 6, 7, 2, 3, 4, 5, 6, 7)
@@ -25,16 +21,13 @@ trait RutValidator {
     dv.equals(calculaDigitoVerificador(rol.toString))
 
   def validate(rawRut: String): Either[String, String] = {
-    if (logger.isInfoEnabled) logger.info(s"validate() - rawRut[$rawRut]")
     if (!rawRut.trim.isEmpty) {
 
       val rutFiltrado = rawRut.trim.filter(p => p.isDigit || p.toString.toLowerCase.equals(k)).toLowerCase
-      if (logger.isInfoEnabled) logger.info(s"validate() - rutFiltrado[$rutFiltrado]")
 
       val lenght = rutFiltrado.length
 
       if (lenght >= 8) {
-        if (logger.isInfoEnabled) logger.info(s"validate() - largo valido: $rutFiltrado")
         val base = rutFiltrado.substring(0, lenght - 1).toInt
         val dig = rutFiltrado.substring(lenght - 1)
         if (isValidContraDv(base, dig)) {
@@ -44,7 +37,6 @@ trait RutValidator {
         }
 
       } else {
-        if (logger.isInfoEnabled) logger.info(s"validate() - largo NO valido: $rutFiltrado")
         Left("rut.mal.constituido")
       }
 

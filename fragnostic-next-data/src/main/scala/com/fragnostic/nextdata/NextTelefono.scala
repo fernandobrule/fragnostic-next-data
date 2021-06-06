@@ -63,9 +63,9 @@ trait NextTelefono extends FilesSupport {
   }
 
   protected def nextRandomBrazilMobileNumberWithCodeArea: String =
-    s"55 $nextRandomBrazilMobileNumberWithoutCodeArea"
+    s"\u002b55\u0020$nextRandomBrazilMobileNumberWithoutCodeArea"
 
   protected def nextRandomBrazilMobileNumberWithoutCodeArea: String =
-    s"$nextRandomBrazilDiallingCode 9$nextRandomNumber"
+    s"\u0028$nextRandomBrazilDiallingCode\u0029\u00209$nextRandomNumber"
 
 }

@@ -66,8 +66,15 @@ trait NextAlfanum extends FilesSupport with RutValidator {
   final def nextRandomNomFant: String =
     s"${nextRandomNom.capitalize} ${nextRandomAdj.capitalize}"
 
-  final def nextRandomUsername: String =
-    s"${nextRandomNom.capitalize}${nextRandomAdj.capitalize}"
+  @tailrec
+  final def nextRandomUsername: String = {
+    val username = s"${nextRandomNom.capitalize}${nextRandomAdj.capitalize}"
+    if (username.length < 8) {
+      nextRandomUsername
+    } else {
+      username
+    }
+  }
 
   final def nextCharInPsw: Char =
     passwordSpecialCharacters charAt (Random nextInt passwordSpecialCharacters.length)
